@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion, useScroll, useSpring, useTransform } from 'framer-motion'
+import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion'
 import { ArrowDown, ArrowRight, ArrowUpRight, Check, Menu, Moon, Sun, X } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
@@ -209,22 +209,11 @@ function Home() {
   return (
     <>
       <Hero />
-      <section className="pov section-pad">
-        <div className="pov-copy">
-          <div className="mono eyebrow"><span />THE POINT OF VIEW</div>
-          <TextReveal as="h2" className="display outline-line">WE DON'T BUILD MORE WEBSITES.</TextReveal>
-          <TextReveal as="h2" className="display filled-line" delay={.08}>WE BUILD THE ONES PEOPLE REMEMBER.</TextReveal>
-          <Reveal as="p">In a world full of templates, sameness is expensive. Outmark combines design, engineering and motion to build digital experiences with a point of view.</Reveal>
-        </div>
-        <Marquee words="WEB DESIGN · WEB DEVELOPMENT · DIGITAL EXPERIENCES · GROWTH FOUNDATIONS · E-COMMERCE · BRAND SYSTEMS ·" />
-      </section>
-      <section className="services-home section-pad">
-        <SectionIntro eyebrow="CAPABILITIES / 01—04" title="WHAT WE DO" body="Not a list of deliverables. A system for making your business better online." />
-        <div className="service-stack">{services.map((s, i) => <ServicePanel key={s.no} service={s} index={i} />)}</div>
-      </section>
+      <ProofRail />
+      <CapabilityBento />
       <SystemSection />
       <section className="work-home section-pad">
-        <SectionIntro eyebrow="SELECTED / CONCEPT WORK" title={<>SELECTED<br />WORK</>} body="New studio. Real ambition. These are honestly-labelled concept projects built to show how we think." />
+        <SectionIntro eyebrow="SELECTED / CONCEPT WORK" title={<>IDEAS MADE<br />TANGIBLE.</>} body="Three concept worlds that show our range across industrial, premium service and product businesses." />
         <div className="work-grid">{projects.map((p, i) => <ProjectCard key={p.name} project={p} index={i} />)}</div>
         <Link className="text-link" to="/work">ALL WORK <ArrowRight /></Link>
       </section>
@@ -243,22 +232,95 @@ function Home() {
 function Hero() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
-  const y = useTransform(scrollYProgress, [0, 1], [0, 180])
+  const y = useTransform(scrollYProgress, [0, 1], [0, 110])
   return (
-    <section ref={ref} className="hero grid-bg">
-      <div className="hero-hud mono"><span>yourbusiness.com</span><span>LCP 0.6S</span><span>MOTION ON</span><span>SEO READY</span></div>
-      <motion.img style={{ y }} className="hero-ghost" src="/assets/abstract-wave.jpg" alt="" />
-      <div className="hero-windows" aria-hidden="true"><CodeWindow /><BrowserWindow /></div>
-      <div className="hero-main">
-        <h1 className="display hero-title"><motion.span initial={{ y: 120, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.58, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}>OUTMARK</motion.span><motion.em initial={{ y: 70, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.72, duration: .9, ease: [0.16, 1, 0.3, 1] }}>the</motion.em><motion.b initial={{ y: 90, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.8, duration: 1, ease: [0.16, 1, 0.3, 1] }}>ORDINARY.</motion.b></h1>
-        <div className="hero-lower">
-          <div><p>We design and build digital experiences for businesses that refuse to blend in.</p><div className="mono hero-tags">STRATEGY <i /> DESIGN <i /> DEVELOPMENT <i /> GROWTH</div></div>
-          <div className="hero-actions"><Link to="/contact" className="pill light">Start a project <ArrowUpRight size={16} /></Link><Link to="/work" className="under-link">Explore our work <ArrowRight size={16} /></Link></div>
+    <section ref={ref} className="hero hero-v2 grid-bg">
+      <motion.div style={{ y }} className="hero-gradient" aria-hidden="true" />
+      <div className="hero-grid-v2">
+        <div className="hero-copy-v2">
+          <motion.div className="hero-kicker mono" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.35, duration: .7 }}><span />INDEPENDENT DIGITAL STUDIO · INDIA / EVERYWHERE</motion.div>
+          <h1 className="display hero-statement">
+            <motion.span initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ delay: 1.48, duration: 1, ease: [0.16, 1, 0.3, 1] }}>WE DESIGN,</motion.span>
+            <motion.span initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ delay: 1.58, duration: 1, ease: [0.16, 1, 0.3, 1] }}>BUILD <em>& GROW</em></motion.span>
+            <motion.span initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ delay: 1.68, duration: 1, ease: [0.16, 1, 0.3, 1] }}>DIGITAL BRANDS.</motion.span>
+          </h1>
+          <motion.p className="hero-deck" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.85, duration: .75 }}>Outmark turns ambitious businesses into clear, high-converting digital experiences—from positioning and interface design to React development, motion and launch.</motion.p>
+          <motion.div className="hero-actions-v2" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.96, duration: .75 }}><Link to="/contact" className="pill light">Build with Outmark <ArrowUpRight size={16} /></Link><Link to="/services" className="under-link">See our capabilities <ArrowRight size={16} /></Link></motion.div>
+          <motion.div className="hero-scope mono" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.1 }}><span>01 STRATEGY</span><span>02 DESIGN</span><span>03 DEVELOPMENT</span><span>04 GROWTH</span></motion.div>
         </div>
+        <HeroInterface />
       </div>
-      <div className="scroll-cue mono"><span>01</span><span className="line" /><span>SCROLL</span><ArrowDown size={13} /></div>
-      <ModeToggle />
+      <div className="hero-bottom mono"><span>AVAILABLE FOR SELECT PROJECTS · Q4 / 2026</span><span>SCROLL TO EXPLORE <ArrowDown size={13} /></span></div>
     </section>
+  )
+}
+
+function HeroInterface() {
+  const shell = useRef(null)
+  const rx = useMotionValue(-5)
+  const ry = useMotionValue(7)
+  const rotateX = useSpring(rx, { stiffness: 150, damping: 20 })
+  const rotateY = useSpring(ry, { stiffness: 150, damping: 20 })
+  const move = (event) => {
+    const bounds = shell.current?.getBoundingClientRect()
+    if (!bounds) return
+    rx.set(((event.clientY - bounds.top) / bounds.height - .5) * -12)
+    ry.set(((event.clientX - bounds.left) / bounds.width - .5) * 14)
+  }
+  return (
+    <motion.div className="hero-interface-wrap" initial={{ opacity: 0, scale: .9, y: 45 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1.55, duration: 1.2, ease: [0.16, 1, 0.3, 1] }} onPointerMove={move} onPointerLeave={() => { rx.set(-5); ry.set(7) }} ref={shell}>
+      <motion.div className="hero-interface" style={{ rotateX, rotateY }}>
+        <div className="interface-glow" />
+        <div className="interface-card interface-main">
+          <div className="interface-top mono"><span>OUTMARK / LIVE SYSTEM</span><span className="live-dot">● ONLINE</span></div>
+          <div className="interface-chart"><i /><i /><i /><i /><i /><i /><b /></div>
+          <div className="interface-metric"><small className="mono">DIGITAL MOMENTUM</small><strong className="display">+38%</strong><span>Sharper story. Faster experience. Clearer action.</span></div>
+          <div className="interface-stats mono"><span><b>0.6s</b>LCP</span><span><b>98</b>PERF.</span><span><b>100%</b>CUSTOM</span></div>
+        </div>
+        <motion.div className="interface-card float-card strategy" animate={{ y: [0, -12, 0], rotateZ: [-4, -2, -4] }} transition={{ repeat: Infinity, duration: 5.5, ease: 'easeInOut' }}><span className="mono">01 / STRATEGY</span><b>POSITION → STORY</b></motion.div>
+        <motion.div className="interface-card float-card shipped" animate={{ y: [0, 10, 0], rotateZ: [5, 3, 5] }} transition={{ repeat: Infinity, duration: 6.2, ease: 'easeInOut' }}><span className="status-ring"><i /></span><div><b>SHIPPED.</b><small className="mono">DESIGN / CODE / GROWTH</small></div></motion.div>
+        <div className="interface-orbit orbit-one" /><div className="interface-orbit orbit-two" />
+      </motion.div>
+      <div className="drag-note mono">MOVE TO TILT / INTERACTIVE</div>
+    </motion.div>
+  )
+}
+
+function ProofRail() {
+  const proof = [
+    ['4', 'CONNECTED CAPABILITIES'],
+    ['1', 'ACCOUNTABLE STUDIO'],
+    ['100%', 'CUSTOM-BUILT'],
+    ['01—06', 'WEEKS TO FIRST LAUNCH'],
+  ]
+  return <section className="proof-rail">{proof.map(([value, label], i) => <Reveal className="proof-item" delay={i * .06} key={label}><strong className="display">{value}</strong><span className="mono">{label}</span></Reveal>)}</section>
+}
+
+function CapabilityBento() {
+  return (
+    <section className="capabilities section-pad">
+      <div className="capability-intro">
+        <SectionIntro eyebrow="WHAT OUTMARK ACTUALLY DOES" title={<>ONE STUDIO.<br /><em>FOUR OUTCOMES.</em></>} body="You don't need disconnected vendors. You need one sharp system where strategy, design, engineering and growth work together." />
+      </div>
+      <div className="capability-grid">
+        {services.map((service, index) => <CapabilityCard key={service.no} service={service} index={index} />)}
+      </div>
+      <Marquee words="POSITION IT · DESIGN IT · BUILD IT · LAUNCH IT · MEASURE IT · IMPROVE IT ·" />
+    </section>
+  )
+}
+
+function CapabilityCard({ service, index }) {
+  const outcomes = ['A brand people recognise', 'A site that feels fast', 'A story people remember', 'A system you can improve']
+  return (
+    <motion.article className={cx('capability-card', `capability-${index + 1}`)} initial={{ opacity: 0, y: 55 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-8%' }} whileHover={{ y: -10 }} transition={{ duration: .8, ease: [0.16, 1, 0.3, 1] }}>
+      <div className="capability-head"><span className="mono">{service.no} / {service.title}</span><ArrowUpRight /></div>
+      <div className={cx('capability-symbol', `symbol-${service.art}`)} aria-hidden="true"><i /><i /><i /></div>
+      <h3 className="display">{service.intro}</h3>
+      <p>{service.body}</p>
+      <div className="capability-outcome"><small className="mono">BUILT TO CREATE</small><b>{outcomes[index]}</b></div>
+      <div className="tag-list mono">{service.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
+    </motion.article>
   )
 }
 
@@ -297,13 +359,25 @@ function ServiceVisual({ type }) {
 
 function SystemSection() {
   const steps = [
-    ['VISITOR', 'A stranger finds you — through search, social or word of mouth.', 'SEARCH · SOCIAL · REFERRAL'],
-    ['EXPERIENCE', 'Clarity, speed and a story worth staying for.', 'WEBSITE · MOBILE · STORY'],
-    ['ENQUIRY', 'Reaching you takes one tap — no friction, no dead ends.', 'FORM · WHATSAPP · EMAIL'],
-    ['LEAD', 'Captured, routed and organised the moment it arrives.', 'SHEET · EMAIL · NOTIFY'],
-    ['GROWTH', 'Measured, refined and scaled — the system compounds.', 'ANALYTICS · SEARCH · ADS'],
+    ['ATTRACT', 'Search, social and campaigns bring the right people in.', 'SEO · SOCIAL · ADS'],
+    ['CONVINCE', 'A clear story and premium experience build trust fast.', 'POSITION · UX · MOTION'],
+    ['CONVERT', 'Focused pathways turn interest into real enquiries.', 'CTA · FORM · WHATSAPP'],
+    ['LEARN', 'Analytics show what is working and what needs attention.', 'EVENTS · FUNNELS · INSIGHT'],
+    ['COMPOUND', 'We refine the system so every launch gets smarter.', 'TEST · IMPROVE · SCALE'],
   ]
-  return <section className="system section-pad grid-bg"><SectionIntro eyebrow="THE BIGGER PICTURE" title={<>NOT JUST A WEBSITE.<br />A DIGITAL SYSTEM.</>} body="Good websites don't end at the screen. They connect attention to action." /><div className="flow-grid">{steps.map((s, i) => <Reveal className="flow-step" key={s[0]} delay={i * .06}><span className="mono">0{i + 1}</span><h3 className="display">{s[0]}</h3><p>{s[1]}</p><small className="mono">{s[2]}</small>{i < steps.length - 1 && <ArrowRight className="flow-arrow" />}</Reveal>)}</div></section>
+  return (
+    <section className="system system-v2 section-pad">
+      <div className="system-copy">
+        <SectionIntro eyebrow="THE OUTMARK SYSTEM" title={<>FROM ATTENTION<br />TO <em>ACTION.</em></>} body="A polished website is only the visible layer. Underneath it, we connect the complete journey—from discovery to enquiry to measurable growth." />
+        <Link to="/services" className="pill system-link">Explore the full service system <ArrowRight size={16} /></Link>
+      </div>
+      <div className="system-stage grid-bg">
+        <div className="system-beam" />
+        <div className="system-core"><LogoMark large /><span className="mono">OUTMARK CORE</span><b className="display">YOUR DIGITAL<br />GROWTH SYSTEM</b></div>
+        {steps.map((step, i) => <motion.div className={cx('system-node', `node-${i + 1}`)} key={step[0]} initial={{ opacity: 0, scale: .75 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * .1, duration: .65 }} whileHover={{ scale: 1.045, zIndex: 4 }}><span className="mono">0{i + 1}</span><div><h3 className="display">{step[0]}</h3><p>{step[1]}</p><small className="mono">{step[2]}</small></div></motion.div>)}
+      </div>
+    </section>
+  )
 }
 
 function ProjectCard({ project, index }) {
