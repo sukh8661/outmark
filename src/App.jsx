@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll, useSpring, useTransform } from 'framer-motion'
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, ChevronDown, Menu, X } from 'lucide-react'
+import { ArrowDown, ArrowRight, ArrowUpRight, Check, Menu, Moon, Sun, X } from 'lucide-react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
 const navItems = [
@@ -69,6 +69,8 @@ function App() {
   const location = useLocation()
   const [loading, setLoading] = useState(true)
   const [menu, setMenu] = useState(false)
+  const [theme, setTheme] = useState('light')
+  const [themeWipe, setThemeWipe] = useState(null)
   const { scrollYProgress } = useScroll()
   const progress = useSpring(scrollYProgress, { stiffness: 130, damping: 30, restDelta: 0.001 })
 
@@ -85,15 +87,28 @@ function App() {
     document.title = title
   }, [location.pathname])
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    document.documentElement.style.colorScheme = theme
+  }, [theme])
+
+  const toggleTheme = () => {
+    if (themeWipe) return
+    const next = theme === 'light' ? 'dark' : 'light'
+    setThemeWipe(next)
+    window.setTimeout(() => setTheme(next), 310)
+    window.setTimeout(() => setThemeWipe(null), 820)
+  }
+
   return (
     <>
       <motion.div className="page-progress" style={{ scaleX: progress }} />
-      <CustomCursor />
+      <AnimatePresence>{themeWipe && <ThemeWipe mode={themeWipe} />}</AnimatePresence>
       <AnimatePresence>{loading && <Loader />}</AnimatePresence>
-      <Header open={menu} setOpen={setMenu} />
+      <Header open={menu} setOpen={setMenu} theme={theme} onTheme={toggleTheme} />
       <MobileMenu open={menu} setOpen={setMenu} />
       <AnimatePresence mode="wait">
-        <motion.main key={location.pathname} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .35 }}>
+        <motion.main key={location.pathname} className="route-stage" initial={{ opacity: 0, clipPath: 'inset(0 0 8% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 0 8%)' }} transition={{ duration: .72, ease: [0.16, 1, 0.3, 1] }}>
           <Routes location={location}>
             <Route path="/" element={<Home />} />
             <Route path="/services" element={<Services />} />
@@ -125,23 +140,39 @@ function Loader() {
   )
 }
 
+function ThemeWipe({ mode }) {
+  return <motion.div className={cx('theme-wipe', mode)} initial={{ clipPath: 'circle(0% at 92% 5%)' }} animate={{ clipPath: 'circle(160% at 92% 5%)' }} exit={{ opacity: 0, transition: { duration: .22 } }} transition={{ duration: .78, ease: [0.76, 0, 0.24, 1] }} />
+}
+
 function LogoMark({ large = false }) {
   return <span className={cx('logo-mark', large && 'large')}><i /><i /><i /></span>
 }
 
-function Header({ open, setOpen }) {
+function Header({ open, setOpen, theme, onTheme }) {
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 32)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
   return (
-    <header className="site-header">
+    <header className={cx('site-header', scrolled && 'scrolled')}>
       <Link className="brand" to="/" aria-label="Outmark home"><LogoMark /><span>OUTMARK</span></Link>
       <nav className="desktop-nav" aria-label="Primary navigation">
         {navItems.slice(0, -1).map(([label, href]) => <NavLink key={href} to={href} className={({ isActive }) => isActive ? 'active' : ''}>{label}</NavLink>)}
       </nav>
       <div className="header-actions">
+        <ThemeToggle theme={theme} onToggle={onTheme} />
         <Link to="/contact" className="pill light">Start a project <ArrowUpRight size={15} /></Link>
         <button className="menu-button" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'}>{open ? <X /> : <Menu />}</button>
       </div>
     </header>
   )
+}
+
+function ThemeToggle({ theme, onToggle }) {
+  return <button className="theme-toggle" onClick={onToggle} aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`} title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}><span className="theme-icons"><Sun size={15} /><Moon size={15} /></span><motion.i layout transition={{ type: 'spring', stiffness: 430, damping: 32 }} className={theme} /><b className="mono">{theme === 'light' ? 'LIGHT' : 'DARK'}</b></button>
 }
 
 function MobileMenu({ open, setOpen }) {
@@ -154,30 +185,21 @@ function MobileMenu({ open, setOpen }) {
   )}</AnimatePresence>
 }
 
-function CustomCursor() {
-  const dot = useRef(null)
-  const ring = useRef(null)
-  useEffect(() => {
-    const move = e => {
-      if (dot.current) dot.current.style.transform = `translate3d(${e.clientX}px,${e.clientY}px,0)`
-      if (ring.current) ring.current.animate({ transform: `translate3d(${e.clientX}px,${e.clientY}px,0)` }, { duration: 420, fill: 'forwards' })
-    }
-    window.addEventListener('mousemove', move)
-    return () => window.removeEventListener('mousemove', move)
-  }, [])
-  return <><div ref={dot} className="cursor-dot" /><div ref={ring} className="cursor-ring" /></>
-}
-
 function Reveal({ children, className = '', delay = 0, as = 'div' }) {
   const M = motion[as]
-  return <M className={className} initial={{ opacity: 0, y: 38 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-8%' }} transition={{ duration: .8, delay, ease: [0.16, 1, 0.3, 1] }}>{children}</M>
+  return <M className={className} initial={{ opacity: 0, y: 58, filter: 'blur(12px)' }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }} viewport={{ once: true, margin: '-8%' }} transition={{ duration: .95, delay, ease: [0.16, 1, 0.3, 1] }}>{children}</M>
+}
+
+function TextReveal({ children, className = '', as = 'h2', delay = 0 }) {
+  const M = motion[as]
+  return <M className={cx('text-reveal', className)} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-10%' }}><motion.span variants={{ hidden: { y: '118%', rotate: 2 }, show: { y: '0%', rotate: 0, transition: { duration: 1.05, delay, ease: [0.16, 1, 0.3, 1] } } }}>{children}</motion.span></M>
 }
 
 function SectionIntro({ eyebrow, title, body, compact = false }) {
   return (
     <div className={cx('section-intro', compact && 'compact')}>
       <Reveal className="eyebrow mono"><span />{eyebrow}</Reveal>
-      <Reveal as="h2" className="display" delay={.05}>{title}</Reveal>
+      <TextReveal as="h2" className="display" delay={.05}>{title}</TextReveal>
       {body && <Reveal as="p" delay={.1}>{body}</Reveal>}
     </div>
   )
@@ -190,8 +212,8 @@ function Home() {
       <section className="pov section-pad">
         <div className="pov-copy">
           <div className="mono eyebrow"><span />THE POINT OF VIEW</div>
-          <Reveal as="h2" className="display outline-line">WE DON'T BUILD MORE WEBSITES.</Reveal>
-          <Reveal as="h2" className="display filled-line">WE BUILD THE ONES PEOPLE REMEMBER.</Reveal>
+          <TextReveal as="h2" className="display outline-line">WE DON'T BUILD MORE WEBSITES.</TextReveal>
+          <TextReveal as="h2" className="display filled-line" delay={.08}>WE BUILD THE ONES PEOPLE REMEMBER.</TextReveal>
           <Reveal as="p">In a world full of templates, sameness is expensive. Outmark combines design, engineering and motion to build digital experiences with a point of view.</Reveal>
         </div>
         <Marquee words="WEB DESIGN · WEB DEVELOPMENT · DIGITAL EXPERIENCES · GROWTH FOUNDATIONS · E-COMMERCE · BRAND SYSTEMS ·" />
@@ -228,7 +250,7 @@ function Hero() {
       <motion.img style={{ y }} className="hero-ghost" src="/assets/abstract-wave.jpg" alt="" />
       <div className="hero-windows" aria-hidden="true"><CodeWindow /><BrowserWindow /></div>
       <div className="hero-main">
-        <h1 className="display hero-title"><span>OUTMARK</span><em>the</em><b>ORDINARY.</b></h1>
+        <h1 className="display hero-title"><motion.span initial={{ y: 120, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.58, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}>OUTMARK</motion.span><motion.em initial={{ y: 70, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.72, duration: .9, ease: [0.16, 1, 0.3, 1] }}>the</motion.em><motion.b initial={{ y: 90, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.8, duration: 1, ease: [0.16, 1, 0.3, 1] }}>ORDINARY.</motion.b></h1>
         <div className="hero-lower">
           <div><p>We design and build digital experiences for businesses that refuse to blend in.</p><div className="mono hero-tags">STRATEGY <i /> DESIGN <i /> DEVELOPMENT <i /> GROWTH</div></div>
           <div className="hero-actions"><Link to="/contact" className="pill light">Start a project <ArrowUpRight size={16} /></Link><Link to="/work" className="under-link">Explore our work <ArrowRight size={16} /></Link></div>
@@ -313,7 +335,7 @@ function BigCTA() {
 }
 
 function PageHero({ eyebrow, title, body, image, children }) {
-  return <section className={cx('page-hero grid-bg', image && 'with-image')}><div className="page-hero-inner"><div className="eyebrow mono"><span />{eyebrow}</div><motion.h1 className="display" initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: .9, ease: [0.16, 1, 0.3, 1] }}>{title}</motion.h1>{body && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .35 }}>{body}</motion.p>}{children}</div>{image && <motion.img initial={{ scale: 1.15, opacity: 0 }} animate={{ scale: 1, opacity: .72 }} transition={{ duration: 1.2 }} src={image} alt="" />}</section>
+  return <section className={cx('page-hero grid-bg', image && 'with-image')}><div className="page-hero-inner"><motion.div className="eyebrow mono" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: .7 }}><span />{eyebrow}</motion.div><TextReveal as="h1" className="display">{title}</TextReveal>{body && <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .45, duration: .7 }}>{body}</motion.p>}{children}</div>{image && <motion.img initial={{ scale: 1.15, opacity: 0 }} animate={{ scale: 1, opacity: .72 }} transition={{ duration: 1.35, ease: [0.16, 1, 0.3, 1] }} src={image} alt="" />}</section>
 }
 
 function Services() {
