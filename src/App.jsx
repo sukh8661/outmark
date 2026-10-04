@@ -67,7 +67,9 @@ function cx(...v) { return v.filter(Boolean).join(' ') }
 
 function App() {
   const location = useLocation()
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => {
+    try { return sessionStorage.getItem('outmark-device-intro-v1') !== 'played' } catch { return true }
+  })
   const [menu, setMenu] = useState(false)
   const [theme, setTheme] = useState('light')
   const [themeWipe, setThemeWipe] = useState(null)
@@ -75,9 +77,19 @@ function App() {
   const progress = useSpring(scrollYProgress, { stiffness: 130, damping: 30, restDelta: 0.001 })
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1650)
-    return () => clearTimeout(timer)
-  }, [])
+    if (!loading) return undefined
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    document.body.classList.add('intro-running')
+    const timer = window.setTimeout(() => {
+      try { sessionStorage.setItem('outmark-device-intro-v1', 'played') } catch { /* storage can be unavailable */ }
+      setLoading(false)
+      document.body.classList.remove('intro-running')
+    }, reducedMotion ? 500 : 4350)
+    return () => {
+      window.clearTimeout(timer)
+      document.body.classList.remove('intro-running')
+    }
+  }, [loading])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
@@ -128,15 +140,70 @@ function App() {
 function Loader() {
   const [number, setNumber] = useState(0)
   useEffect(() => {
-    const id = setInterval(() => setNumber(n => Math.min(n + Math.ceil((100 - n) / 5), 100)), 65)
-    return () => clearInterval(id)
+    const started = Date.now()
+    const id = window.setInterval(() => setNumber(Math.min(100, Math.round((Date.now() - started) / 40))), 40)
+    return () => window.clearInterval(id)
   }, [])
+  const phase = number < 22 ? 'INITIALISING' : number < 48 ? 'OPENING DISPLAY' : number < 78 ? 'LOADING OUTMARK' : 'ENTERING EXPERIENCE'
   return (
-    <motion.div className="loader" exit={{ y: '-100%' }} transition={{ duration: .75, ease: [0.76, 0, 0.24, 1] }}>
-      <div className="loader-top mono"><span>DIGITAL STUDIO</span><span>LOADING</span></div>
-      <div className="loader-center"><LogoMark large /><div className="display loader-word">OUTMARK</div></div>
+    <motion.div className="loader device-loader" exit={{ opacity: 0, filter: 'blur(8px)' }} transition={{ duration: .7, ease: [0.16, 1, 0.3, 1] }}>
+      <div className="loader-ambient" aria-hidden="true" />
+      <div className="loader-top mono"><span><LogoMark /> OUTMARK / DIGITAL STUDIO</span><span>{phase}</span></div>
+      <div className="loader-device-scene">
+        <motion.div className="device-zoom" initial={{ scale: .82, y: 58 }} animate={{ scale: [.82, .82, 1, 1, 3.25], y: [58, 58, 0, 0, 0], opacity: [1, 1, 1, 1, 0] }} transition={{ duration: 4.2, times: [0, .16, .4, .72, 1], ease: [0.76, 0, 0.24, 1] }}>
+          <LaptopIntro />
+          <PhoneIntro />
+        </motion.div>
+        <motion.div className="loader-instruction mono" initial={{ opacity: 0, y: 12 }} animate={{ opacity: [0, 1, 1, 0], y: [12, 0, 0, -8] }} transition={{ duration: 3.6, times: [0, .22, .72, 1] }}>A DIGITAL EXPERIENCE BY OUTMARK</motion.div>
+      </div>
       <div className="loader-bottom mono"><span>OUTMARK THE ORDINARY.</span><div className="loader-line"><motion.i animate={{ width: `${number}%` }} /></div><span>{String(number).padStart(3, '0')}%</span></div>
     </motion.div>
+  )
+}
+
+function LaptopIntro() {
+  return (
+    <div className="laptop-device" aria-hidden="true">
+      <motion.div className="laptop-lid" initial={{ rotateX: -88, y: 112, opacity: .45 }} animate={{ rotateX: [-88, -88, 0, 0], y: [112, 112, 0, 0], opacity: [.45, .45, 1, 1] }} transition={{ duration: 2.75, times: [0, .2, .67, 1], ease: [0.16, 1, 0.3, 1] }}>
+        <div className="laptop-shell">
+          <span className="laptop-camera" />
+          <div className="laptop-screen"><MiniSitePreview /></div>
+          <motion.div className="screen-wake" initial={{ scaleY: 1 }} animate={{ scaleY: [1, 1, 0, 0] }} transition={{ duration: 2.3, times: [0, .48, .86, 1], ease: [0.76, 0, 0.24, 1] }} />
+          <div className="screen-sheen" />
+        </div>
+      </motion.div>
+      <div className="laptop-hinge" />
+      <div className="laptop-base"><span className="laptop-keyboard" /><span className="laptop-trackpad" /></div>
+      <div className="laptop-edge" />
+      <div className="device-shadow" />
+    </div>
+  )
+}
+
+function PhoneIntro() {
+  return (
+    <motion.div className="phone-device" aria-hidden="true" initial={{ rotateY: -28, rotateZ: -5, scale: .88 }} animate={{ rotateY: [-28, -28, 0, 0], rotateZ: [-5, -5, 0, 0], scale: [.88, .88, 1, 1] }} transition={{ duration: 2.5, times: [0, .18, .66, 1], ease: [0.16, 1, 0.3, 1] }}>
+      <div className="phone-frame">
+        <span className="phone-island" />
+        <div className="phone-screen"><MiniSitePreview compact /></div>
+        <motion.div className="phone-wake" initial={{ opacity: 1 }} animate={{ opacity: [1, 1, 0, 0] }} transition={{ duration: 2.25, times: [0, .45, .83, 1] }}><LogoMark large /></motion.div>
+        <div className="screen-sheen" />
+      </div>
+      <span className="phone-button phone-button-one" /><span className="phone-button phone-button-two" />
+      <div className="device-shadow" />
+    </motion.div>
+  )
+}
+
+function MiniSitePreview({ compact = false }) {
+  return (
+    <div className={cx('mini-site-preview', compact && 'compact')}>
+      <div className="mini-nav"><span><LogoMark /> OUTMARK</span><i /><i /><i /><b>START A PROJECT</b></div>
+      <div className="mini-hero">
+        <div className="mini-copy"><small>INDEPENDENT DIGITAL STUDIO</small><strong>WE DESIGN,<br />BUILD <em>& GROW</em><br />DIGITAL BRANDS.</strong><p>Strategy, design, development and growth—working as one connected system.</p><span>BUILD WITH OUTMARK</span></div>
+        <div className="mini-dashboard"><small>OUTMARK / LIVE SYSTEM</small><div className="mini-bars"><i /><i /><i /><i /><i /></div><strong>+38%</strong><p>DIGITAL MOMENTUM</p></div>
+      </div>
+    </div>
   )
 }
 
