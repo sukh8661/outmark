@@ -163,34 +163,45 @@ function Loader() {
 
 function LaptopIntro() {
   return (
-    <div className="laptop-device" aria-hidden="true">
-      <motion.div className="laptop-lid" initial={{ rotateX: -88, y: 112, opacity: .45 }} animate={{ rotateX: [-88, -88, 0, 0], y: [112, 112, 0, 0], opacity: [.45, .45, 1, 1] }} transition={{ duration: 2.75, times: [0, .2, .67, 1], ease: [0.16, 1, 0.3, 1] }}>
-        <div className="laptop-shell">
-          <span className="laptop-camera" />
-          <div className="laptop-screen"><MiniSitePreview /></div>
-          <motion.div className="screen-wake" initial={{ scaleY: 1 }} animate={{ scaleY: [1, 1, 0, 0] }} transition={{ duration: 2.3, times: [0, .48, .86, 1], ease: [0.76, 0, 0.24, 1] }} />
+    <div className="laptop-device asset-device" aria-hidden="true">
+      <motion.img
+        className="laptop-render laptop-render-closed"
+        src="/assets/devices/laptop-closed.png"
+        alt=""
+        fetchpriority="high"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: [1, 1, 0, 0] }}
+        transition={{ duration: 2.4, times: [0, .25, .48, 1], ease: [0.16, 1, 0.3, 1] }}
+      />
+      <motion.div
+        className="laptop-open-layer"
+        initial={{ clipPath: 'inset(71% 0 0 0)', opacity: 0 }}
+        animate={{ clipPath: ['inset(71% 0 0 0)', 'inset(71% 0 0 0)', 'inset(0% 0 0 0)', 'inset(0% 0 0 0)'], opacity: [0, 0, 1, 1] }}
+        transition={{ duration: 2.65, times: [0, .2, .69, 1], ease: [0.16, 1, 0.3, 1] }}
+      >
+        <img className="laptop-render laptop-render-open" src="/assets/devices/laptop-open.png" alt="" fetchpriority="high" />
+        <motion.div className="device-live-screen laptop-live-screen" initial={{ opacity: 0 }} animate={{ opacity: [0, 0, 1, 1] }} transition={{ duration: 2.75, times: [0, .48, .72, 1] }}>
+          <MiniSitePreview />
+          <motion.div className="asset-screen-wake" initial={{ scaleY: 1 }} animate={{ scaleY: [1, 1, 0, 0] }} transition={{ duration: 2.9, times: [0, .5, .84, 1], ease: [0.76, 0, 0.24, 1] }} />
           <div className="screen-sheen" />
-        </div>
+        </motion.div>
       </motion.div>
-      <div className="laptop-hinge" />
-      <div className="laptop-base"><span className="laptop-keyboard" /><span className="laptop-trackpad" /></div>
-      <div className="laptop-edge" />
-      <div className="device-shadow" />
+      <motion.div className="asset-device-shadow" initial={{ opacity: .24, scaleX: .76 }} animate={{ opacity: [.24, .24, .42], scaleX: [.76, .76, 1] }} transition={{ duration: 2.5, times: [0, .28, 1] }} />
     </div>
   )
 }
 
 function PhoneIntro() {
   return (
-    <motion.div className="phone-device" aria-hidden="true" initial={{ rotateY: -28, rotateZ: -5, scale: .88 }} animate={{ rotateY: [-28, -28, 0, 0], rotateZ: [-5, -5, 0, 0], scale: [.88, .88, 1, 1] }} transition={{ duration: 2.5, times: [0, .18, .66, 1], ease: [0.16, 1, 0.3, 1] }}>
-      <div className="phone-frame">
-        <span className="phone-island" />
-        <div className="phone-screen"><MiniSitePreview compact /></div>
-        <motion.div className="phone-wake" initial={{ opacity: 1 }} animate={{ opacity: [1, 1, 0, 0] }} transition={{ duration: 2.25, times: [0, .45, .83, 1] }}><LogoMark large /></motion.div>
+    <motion.div className="phone-device asset-device" aria-hidden="true" initial={{ rotateY: -22, rotateZ: -4, scale: .9 }} animate={{ rotateY: [-22, -22, 0, 0], rotateZ: [-4, -4, 0, 0], scale: [.9, .9, 1, 1] }} transition={{ duration: 2.45, times: [0, .18, .68, 1], ease: [0.16, 1, 0.3, 1] }}>
+      <img className="phone-render" src="/assets/devices/phone-front.jpg" alt="" fetchpriority="high" />
+      <div className="device-live-screen phone-live-screen">
+        <MiniSitePreview compact />
+        <motion.div className="asset-screen-wake phone-asset-wake" initial={{ opacity: 1 }} animate={{ opacity: [1, 1, 0, 0] }} transition={{ duration: 2.4, times: [0, .4, .8, 1] }}><LogoMark large /></motion.div>
         <div className="screen-sheen" />
       </div>
-      <span className="phone-button phone-button-one" /><span className="phone-button phone-button-two" />
-      <div className="device-shadow" />
+      <span className="asset-phone-island"><i /></span>
+      <motion.div className="asset-device-shadow" initial={{ opacity: .2, scaleX: .7 }} animate={{ opacity: [.2, .2, .38], scaleX: [.7, .7, 1] }} transition={{ duration: 2.3, times: [0, .3, 1] }} />
     </motion.div>
   )
 }
