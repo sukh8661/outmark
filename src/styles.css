@@ -44,8 +44,8 @@ img { display: block; max-width: 100%; }
 .page-progress { position: fixed; inset: 0 0 auto; height: 2px; background: var(--violet); transform-origin: 0 50%; z-index: 1000; }
 .route-stage { overflow: clip; }
 .theme-wipe { position: fixed; inset: 0; z-index: 1950; pointer-events: none; }
-.theme-wipe.light { background: #f3f1ea; }
-.theme-wipe.dark { background: #080808; }
+.theme-wipe.light { background: #f7f7fb; }
+.theme-wipe.dark { background: #0c0c12; }
 .text-reveal { overflow: hidden; }
 .text-reveal > span { display: block; transform-origin: left bottom; }
 
